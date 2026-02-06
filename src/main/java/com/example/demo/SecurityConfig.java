@@ -20,7 +20,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService customUserDetailsService) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
@@ -28,11 +28,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public", "/join", "/").permitAll()
+                        .requestMatchers("/auth/**", "/public", "/join", "/").permitAll()
                         .requestMatchers("/private").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // 여기!
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)

@@ -17,7 +17,7 @@ public class SimpleController {
 
     @GetMapping("/private")
     public String privateApi(Authentication authentication) {
-        String userEmail = (String) authentication.getPrincipal();
-        return "hello userEmail=" + userEmail;
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return "hello userEmail=" + userDetails.getUsername();
     }
 }

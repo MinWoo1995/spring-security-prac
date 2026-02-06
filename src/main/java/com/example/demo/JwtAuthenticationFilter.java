@@ -20,9 +20,12 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService) {
+
         this.jwtUtil = jwtUtil;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Override
@@ -55,12 +58,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String email = claims.getSubject();
-        String role = claims.get("role", String.class);
+        //String role = claims.get("role", String.class);
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
 
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+        //List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
         Authentication authentication =
-                new UsernamePasswordAuthenticationToken(email, null, authorities);
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
